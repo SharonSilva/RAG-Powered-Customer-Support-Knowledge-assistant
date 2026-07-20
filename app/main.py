@@ -4,9 +4,10 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Document, Chunk
 from app.services.parsing import extract_text_from_pdf
+from app.services.docx_parsing import extract_text_from_docx
+from app.services.markdown_parsing import extract_text_from_markdown
 from app.services.chunking import chunk_pages
 from app.services.embedding import generate_embeddings_batch
-from app.services.docx_parsing import extract_text_from_docx
 
 app = FastAPI(title="RAG-Powered Customer Support Knowledge Assistant")
 
@@ -15,6 +16,7 @@ app = FastAPI(title="RAG-Powered Customer Support Knowledge Assistant")
 def health_check():
     return {"status": "ok"}
 
+
 def _parse_by_filetype(filename: str, file_bytes: bytes) -> list[dict]:
     lower_name = filename.lower()
 
@@ -22,10 +24,12 @@ def _parse_by_filetype(filename: str, file_bytes: bytes) -> list[dict]:
         return extract_text_from_pdf(file_bytes)
     elif lower_name.endswith(".docx"):
         return extract_text_from_docx(file_bytes)
+    elif lower_name.endswith(".md"):
+        return extract_text_from_markdown(file_bytes)
     else:
         raise HTTPException(
             status_code=400,
-            detail="Unsupported file type. Please upload a PDF or DOCX file.",
+            detail="Unsupported file type. Please upload a PDF, DOCX, or Markdown file.",
         )
 
 
