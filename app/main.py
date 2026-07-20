@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -6,6 +7,7 @@ from app.models import Document, Chunk
 from app.services.parsing import extract_text_from_pdf
 from app.services.docx_parsing import extract_text_from_docx
 from app.services.markdown_parsing import extract_text_from_markdown
+from app.services.url_parsing import fetch_and_extract_text_from_url
 from app.services.chunking import chunk_pages
 from app.services.embedding import generate_embeddings_batch
 
@@ -31,6 +33,43 @@ def _parse_by_filetype(filename: str, file_bytes: bytes) -> list[dict]:
             status_code=400,
             detail="Unsupported file type. Please upload a PDF, DOCX, or Markdown file.",
         )
+        
+class UrlIngestRequest(BaseModel):
+    url: str
+
+
+@app.post("/ingest-url")
+async def ingest_url(payload: UrlIngestRequest, db: Session = Depends(get_db)):
+    try:
+        pages = fetch_and_extract_text_from_url(payload.url)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Could not fetch URL: {str(e)}")
+
+    chunks = chunk_pages(pages)
+    chunk_texts = [c["content"] for c in chunks]
+    embeddings = generate_embeddings_batch(chunk_texts)
+
+    document = Document(filename=payload.url)
+    db.add(document)
+    db.flush()
+
+    for chunk_data, embedding in zip(chunks, embeddings):
+        chunk_row = Chunk(
+            document_id=document.id,
+            content=chunk_data["content"],
+            embedding=embedding,
+            page_number=chunk_data["page_number"],
+            section_title=chunk_data["section_title"],
+        )
+        db.add(chunk_row)
+
+    db.commit()
+
+    return {
+        "source_url": payload.url,
+        "document_id": document.id,
+        "num_chunks": len(chunks),
+    }
 
 
 @app.post("/upload")
