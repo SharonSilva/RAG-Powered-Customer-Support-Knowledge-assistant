@@ -15,10 +15,12 @@ class Document(Base):
     chunks = relationship("Chunk", back_populates="document", cascade="all, delete-orphan")
     
 class Chunk(Base):
-    __tablename__ ="chunks";
+    __tablename__ = "chunks"
     
     id = Column(Integer, primary_key=True, index=True)
     document_id = Column(Integer, ForeignKey("documents.id"), nullable=False)
     content = Column(Text, nullable=False)
-    embedding = Column(Vector(1536))                # matchs OpenAI text-embedding-3-small dimension
+    embedding = Column(Vector(1536))        # matches OpenAI text-embedding-3-small dimension
+    page_number = Column(Integer, nullable=True) # which page this chunk came from
+    section_title = Column(String, nullable=True) #nearest heading, if detected
     document = relationship("Document", back_populates="chunks")
