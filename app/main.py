@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Depends
+from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -6,6 +6,7 @@ from app.models import Document, Chunk
 from app.services.parsing import extract_text_from_pdf
 from app.services.chunking import chunk_pages
 from app.services.embedding import generate_embeddings_batch
+from app.services.docx_parsing import extract_text_from_docx
 
 app = FastAPI(title="RAG-Powered Customer Support Knowledge Assistant")
 
@@ -14,12 +15,25 @@ app = FastAPI(title="RAG-Powered Customer Support Knowledge Assistant")
 def health_check():
     return {"status": "ok"}
 
+def _parse_by_filetype(filename: str, file_bytes: bytes) -> list[dict]:
+    lower_name = filename.lower()
+
+    if lower_name.endswith(".pdf"):
+        return extract_text_from_pdf(file_bytes)
+    elif lower_name.endswith(".docx"):
+        return extract_text_from_docx(file_bytes)
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported file type. Please upload a PDF or DOCX file.",
+        )
+
 
 @app.post("/upload")
 async def upload_document(file: UploadFile = File(...), db: Session = Depends(get_db)):
     file_bytes = await file.read()
 
-    pages = extract_text_from_pdf(file_bytes)
+    pages = _parse_by_filetype(file.filename, file_bytes)
     chunks = chunk_pages(pages)
 
     chunk_texts = [c["content"] for c in chunks]
