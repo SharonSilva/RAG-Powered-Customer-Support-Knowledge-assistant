@@ -10,6 +10,7 @@ from app.services.markdown_parsing import extract_text_from_markdown
 from app.services.url_parsing import fetch_and_extract_text_from_url
 from app.services.chunking import chunk_pages
 from app.services.embedding import generate_embeddings_batch
+from app.services.retrieval import retrieve_similar_chunks
 
 app = FastAPI(title="RAG-Powered Customer Support Knowledge Assistant")
 
@@ -33,6 +34,25 @@ def _parse_by_filetype(filename: str, file_bytes: bytes) -> list[dict]:
             status_code=400,
             detail="Unsupported file type. Please upload a PDF, DOCX, or Markdown file.",
         )
+        
+class QueryRequest(BaseModel):
+    question: str
+        
+@app.post("/query")
+async def query(payload: QueryRequest, db: Session = Depends(get_db)):
+    chunks = retrieve_similar_chunks(payload.question, db, top_k=5)
+    
+    return{
+        "question": payload.question,
+        "results": [{
+         "document_id": c.document_id,
+            "section_title": c.section_title,
+            "page_number": c.page_number,
+            "content": c.content,   
+        }
+            for c in chunks
+        ],
+    }
         
 class UrlIngestRequest(BaseModel):
     url: str
