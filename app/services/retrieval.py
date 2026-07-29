@@ -21,3 +21,23 @@ def retrieve_similar_chunks(query: str, db: Session, top_k: int = 5) -> list[Chu
 
     results = db.execute(stmt).scalars().all()
     return list(results)
+
+def retrieve_candidates_with_distance(query: str, db: Session, top_k: int= 10) -> list[tuple[Chunk, float]]:
+    """
+    Same as retrieve_similar_chunks, but also returns each chunk's raw
+    cosine distance score (lower=more similar). Used by the re-ranking step ,
+    which needs the actual distance value , not just chunk order
+    """
+    
+    query_embedding = generate_embedding(query)
+    distance_expr = Chunk.embedding.cosine_distance(query_embedding)
+    
+    stmt =(
+        select(Chunk, distance_expr.label("distance"))
+        .order_by(distance_expr)
+        .limit(top_k)
+    )
+    
+    rows = db.execute(stmt).all()
+    return [(row[0], row[1]) for row in rows]
+    
