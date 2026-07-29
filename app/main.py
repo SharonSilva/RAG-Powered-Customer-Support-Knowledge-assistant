@@ -10,8 +10,8 @@ from app.services.markdown_parsing import extract_text_from_markdown
 from app.services.url_parsing import fetch_and_extract_text_from_url
 from app.services.chunking import chunk_pages
 from app.services.embedding import generate_embeddings_batch
-from app.services.retrieval import retrieve_similar_chunks
-
+from app.services.retrieval import retrieve_similar_chunks, retrieve_candidates_with_distance
+from app.services.reranking import rerank
 app = FastAPI(title="RAG-Powered Customer Support Knowledge Assistant")
 
 
@@ -40,7 +40,8 @@ class QueryRequest(BaseModel):
         
 @app.post("/query")
 async def query(payload: QueryRequest, db: Session = Depends(get_db)):
-    chunks = retrieve_similar_chunks(payload.question, db, top_k=5)
+    candidates = retrieve_candidates_with_distance(payload.question, db, top_k=10)
+    chunks = rerank(payload.question, candidates, top_k=5)
     
     return{
         "question": payload.question,
