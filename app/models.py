@@ -10,6 +10,7 @@ class Document(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String, nullable=False)
+    category = Column(String, nullable=True)  # e.g. billing, shipping, account
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
     
     chunks = relationship("Chunk", back_populates="document", cascade="all, delete-orphan")
