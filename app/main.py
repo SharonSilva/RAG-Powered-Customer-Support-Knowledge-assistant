@@ -13,6 +13,7 @@ from app.services.chunking import chunk_pages
 from app.services.embedding import generate_embeddings_batch
 from app.services.retrieval import retrieve_similar_chunks, retrieve_candidates_with_distance
 from app.services.reranking import rerank
+from app.services.generation import generate_answer
 
 app = FastAPI(title="RAG-powered Customer Support Knowledge Assistant")
 
@@ -57,6 +58,17 @@ async def query(payload:QueryRequest, db:Session = Depends(get_db)):
             for c in chunks
         ],
     }
+    
+class AskRequest(BaseModel):
+    question: str
+    category: Optional[str] = None
+
+
+@app.post("/ask")
+async def ask(payload: AskRequest, db: Session = Depends(get_db)):
+    result = generate_answer(payload.question, db, category=payload.category)
+    return result
+
 
 class UrlIngestRequest(BaseModel):
     url: str
