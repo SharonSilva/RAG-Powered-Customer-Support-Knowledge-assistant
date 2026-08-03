@@ -15,6 +15,8 @@ from app.services.retrieval import retrieve_similar_chunks, retrieve_candidates_
 from app.services.reranking import rerank
 from app.services.generation import generate_answer
 from app.services.clustering import cluster_unanswered_queries
+from app.services.recommendations import generate_recommendations
+from app.models import GapRecommendation
 
 app = FastAPI(title="RAG-powered Customer Support Knowledge Assistant")
 
@@ -126,6 +128,71 @@ async def get_knowledge_gaps(db: Session = Depends(get_db)):
     }
 
 
+@app.post("/analytics/recommendations/generate")
+async def generate_gap_recommendations(db: Session = Depends(get_db)):
+    new_recs = generate_recommendations(db)
+
+    return {
+        "new_recommendations": len(new_recs),
+        "recommendations": [
+            {
+                "id": r.id,
+                "topic": r.topic,
+                "times_asked": r.times_asked,
+                "suggested_question": r.suggested_question,
+                "suggested_answer": r.suggested_answer,
+                "status": r.status,
+            }
+            for r in new_recs
+        ],
+    }
+
+
+@app.get("/analytics/recommendations")
+async def list_gap_recommendations(status: str | None = None, db: Session = Depends(get_db)):
+    query = db.query(GapRecommendation)
+    if status:
+        query = query.filter(GapRecommendation.status == status)
+
+    recs = query.order_by(GapRecommendation.times_asked.desc()).all()
+
+    return {
+        "recommendations": [
+            {
+                "id": r.id,
+                "topic": r.topic,
+                "times_asked": r.times_asked,
+                "suggested_question": r.suggested_question,
+                "suggested_answer": r.suggested_answer,
+                "status": r.status,
+                "created_at": r.created_at,
+            }
+            for r in recs
+        ],
+    }
+
+
+class RecommendationStatusUpdate(BaseModel):
+    status: str
+
+
+@app.patch("/analytics/recommendations/{recommendation_id}")
+async def update_recommendation_status(
+    recommendation_id: int, payload: RecommendationStatusUpdate, db: Session = Depends(get_db)
+):
+    if payload.status not in {"approved", "rejected"}:
+        raise HTTPException(status_code=400, detail="status must be 'approved' or 'rejected'")
+
+    rec = db.query(GapRecommendation).filter(GapRecommendation.id == recommendation_id).first()
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recommendation not found")
+
+    rec.status = payload.status
+    db.commit()
+
+    return {"id": rec.id, "status": rec.status}
+
+
 @app.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
@@ -162,6 +229,3 @@ async def upload_document(
         "category": document.category,
         "num_chunks" : len(chunks),
     }
-        
-        
-    
