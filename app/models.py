@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship 
 from sqlalchemy.sql import func
 from pgvector.sqlalchemy import Vector
@@ -25,3 +25,28 @@ class Chunk(Base):
     page_number = Column(Integer, nullable=True) # which page this chunk came from
     section_title = Column(String, nullable=True) #nearest heading, if detected
     document = relationship("Document", back_populates="chunks")
+    
+    
+class QueryLog(Base):
+    """
+    Records every question asked through /ask. This si the foundation for knowledge gap analytics : clustering unanswered
+    questions by topic, generating FAQ recommendations, measuring whether knowledge base updates reduce the 
+    fallback and session-based confusion detection.
+    """
+    
+    __tablename__ = "query_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    question = Column(Text, nullable=False)
+    embedding = Column(Vector(1536), nullable=True)
+    category = Column(String, nullable=True)
+    top_score = Column(Float, nullable=True)
+    answered = Column(Boolean, nullable=False)
+    
+    session_id = Column(String, nullable=True)
+    feedback = Column(String, nullable=True)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+
+    

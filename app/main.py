@@ -63,7 +63,6 @@ class AskRequest(BaseModel):
     question: str
     category: Optional[str] = None
 
-
 @app.post("/ask")
 async def ask(payload: AskRequest, db: Session = Depends(get_db)):
     result = generate_answer(payload.question, db, category=payload.category)

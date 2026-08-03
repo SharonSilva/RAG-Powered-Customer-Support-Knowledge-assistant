@@ -5,14 +5,15 @@ from sqlalchemy import select
 from app.models import Chunk, Document
 from app.services.embedding import generate_embedding
 
-def retrieve_similar_chunks(query: str, db: Session, top_k: int = 5, category: Optional[str] = None) -> list[Chunk]:
+def retrieve_similar_chunks(query: str, db: Session, top_k: int = 5, category: Optional[str] = None, query_embedding: Optional[list[float]] = None) -> list[Chunk]:
     """
     Embeds the query and finds the top_k most similar chunks in pgvector
     using cosine distance. Returns Chunk model instances (not raw text),
     so callers have access to document_id, page_number, and section_title
     for citations.
     """
-    query_embedding = generate_embedding(query)
+    if query_embedding is None:
+        query_embedding = generate_embedding(query)
 
     stmt = (
         select(Chunk)
@@ -26,14 +27,17 @@ def retrieve_similar_chunks(query: str, db: Session, top_k: int = 5, category: O
     results = db.execute(stmt).scalars().all()
     return list(results)
 
-def retrieve_candidates_with_distance(query: str, db: Session, top_k: int= 10, category: Optional[str] = None) -> list[tuple[Chunk, float]]:
+def retrieve_candidates_with_distance(query: str, db: Session, top_k: int= 10, category: Optional[str] = None, query_embedding: Optional[list[float]] = None,) -> list[tuple[Chunk, float]]:
     """
     Same as retrieve_similar_chunks, but also returns each chunk's raw
-    cosine distance score (lower=more similar). Used by the re-ranking step ,
-    which needs the actual distance value , not just chunk order
+    cosine distance score (lower=more similar). Accepts an optional precomputed query_embedding
+    to avoid re-embedding the same query text twice when the caller (e.g. generation.py) already neeeds
+    the embedding for other purposes . like
+    logging it to query_logs.
     """
-    
-    query_embedding = generate_embedding(query)
+    if query_embedding is None:
+        query_embedding = generate_embedding(query)
+        
     distance_expr = Chunk.embedding.cosine_distance(query_embedding)
     
     stmt = select(Chunk, distance_expr.label("distance")).order_by(distance_expr).limit(top_k)

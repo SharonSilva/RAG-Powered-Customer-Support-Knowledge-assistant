@@ -2,9 +2,10 @@ import os
 from openai import OpenAI
 
 from sqlalchemy.orm import Session
-
+from app.models import QueryLog
 from app.services.retrieval import retrieve_candidates_with_distance
 from app.services.reranking import rerank_with_scores
+from app.services.embedding import generate_embedding
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -28,16 +29,39 @@ def _build_context(scores_chunks: list[tuple]) -> str:
         
     return "\n\n".join(lines)
 
-def generate_answer(query: str, db: Session, category: str | None = None) -> dict:
-    candidates = retrieve_candidates_with_distance(query, db, top_k=10, category=category)
+def _log_query(
+    db:Session,
+    query: str,
+    query_embedding: list[float],
+    category: str | None,
+    top_score: float |None,
+    answered: bool,
+    session_id: str | None = None,
+) -> None:
+    log_row = QueryLog(
+        question=query,
+        embedding=query_embedding,
+        category=category,
+        top_score=top_score,
+        answered=answered,
+        session_id=session_id,
+    )
+    db.add(log_row)
+    db.commit()
+
+def generate_answer(query: str, db: Session, category: str | None = None, session_id: str | None=None) -> dict:
+    query_embedding = generate_embedding(query)
+    candidates = retrieve_candidates_with_distance(query, db, top_k=10, category=category, query_embedding=query_embedding)
     
     if not candidates:
+        _log_query(db,query,query_embedding,category,None,answered=False,session_id=session_id)
         return {"answer": FALLBACK_MESSAGE, "sources": []}
     
-    scored_chunks = rerank_with_scores(query, candidates, top_k=5)
-    
+    scored_chunks = rerank_with_scores(query, candidates, top_k=5) 
     top_score = scored_chunks[0][1]
+    
     if top_score < CONFIDENCE_THRESHOLD:
+        _log_query(db, query,query_embedding, category, top_score, answered=False,session_id=session_id)
         return {"answer": FALLBACK_MESSAGE, "sources": []}
     
     context = _build_context(scored_chunks)
@@ -72,6 +96,7 @@ def generate_answer(query: str, db: Session, category: str | None = None) -> dic
         }
         for i, (chunk, score) in enumerate(scored_chunks, start=1)
     ]
+    _log_query(db, query, query_embedding, category, top_score, answered=True, session_id=session_id)
     
     return {"answer": answer_text, "sources": sources}
         
