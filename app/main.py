@@ -16,6 +16,7 @@ from app.services.reranking import rerank
 from app.services.generation import generate_answer
 from app.services.clustering import cluster_unanswered_queries
 from app.services.recommendations import generate_recommendations
+from app.services.impact_analytics import get_summary, get_daily_trend
 from app.models import GapRecommendation
 
 app = FastAPI(title="RAG-powered Customer Support Knowledge Assistant")
@@ -110,6 +111,17 @@ async def ingest_url(payload: UrlIngestRequest, db: Session = Depends(get_db)):
         "num_chunks": len(chunks),
     }
     
+@app.get("/analytics/summary")
+async def get_analytics_summary(db: Session = Depends(get_db)):
+    summary = get_summary(db)
+    trend = get_daily_trend(db)
+
+    return {
+        "overall": summary,
+        "daily_trend": trend,
+    }
+
+
 @app.get("/analytics/gaps")
 async def get_knowledge_gaps(db: Session = Depends(get_db)):
     clusters = cluster_unanswered_queries(db)
