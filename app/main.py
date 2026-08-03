@@ -14,6 +14,7 @@ from app.services.embedding import generate_embeddings_batch
 from app.services.retrieval import retrieve_similar_chunks, retrieve_candidates_with_distance
 from app.services.reranking import rerank
 from app.services.generation import generate_answer
+from app.services.clustering import cluster_unanswered_queries
 
 app = FastAPI(title="RAG-powered Customer Support Knowledge Assistant")
 
@@ -107,6 +108,24 @@ async def ingest_url(payload: UrlIngestRequest, db: Session = Depends(get_db)):
         "num_chunks": len(chunks),
     }
     
+@app.get("/analytics/gaps")
+async def get_knowledge_gaps(db: Session = Depends(get_db)):
+    clusters = cluster_unanswered_queries(db)
+
+    return {
+        "total_gap_clusters": len(clusters),
+        "gaps": [
+            {
+                "topic": cluster["representative_question"],
+                "times_asked": cluster["count"],
+                "example_questions": cluster["questions"],
+                "last_seen": cluster["last_seen"],
+            }
+            for cluster in clusters
+        ],
+    }
+
+
 @app.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
@@ -143,8 +162,6 @@ async def upload_document(
         "category": document.category,
         "num_chunks" : len(chunks),
     }
-    
-    
         
         
     
