@@ -8,13 +8,14 @@ from app.services.clustering import cluster_unanswered_queries
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-CHAT_MODEL="gpt-4o-mini"
+CHAT_MODEL = "gpt-4o-mini"
+
 
 def _draft_faq_entry(example_questions: list[str]) -> dict:
     questions_block = "\n".join(f"- {q}" for q in example_questions)
-    
+
     system_prompt = (
-         "You help businesses turn customer questions they couldn't answer "
+        "You help businesses turn customer questions they couldn't answer "
         "into FAQ entries. You will be given several similar customer "
         "questions. Draft ONE clear, general FAQ question that captures "
         "what customers are really asking, and a short placeholder answer "
@@ -23,7 +24,7 @@ def _draft_faq_entry(example_questions: list[str]) -> dict:
         "know the real answer. Mark exactly where the business needs to "
         "add real details using [BRACKETS]."
     )
-    
+
     user_prompt = (
         f"Customer questions that couldn't be answered:\n{questions_block}\n\n"
         "Respond in exactly this format:\n"
@@ -39,9 +40,9 @@ def _draft_faq_entry(example_questions: list[str]) -> dict:
             {"role": "user", "content": user_prompt},
         ],
     )
-    
+
     text = response.choices[0].message.content
-    
+
     question_line = ""
     answer_line = ""
     for line in text.split("\n"):
@@ -49,24 +50,33 @@ def _draft_faq_entry(example_questions: list[str]) -> dict:
             question_line = line.replace("QUESTION:", "").strip()
         elif line.startswith("ANSWER:"):
             answer_line = line.replace("ANSWER:", "").strip()
-            
+
     return {"suggested_question": question_line, "suggested_answer": answer_line}
 
-def generate_recommendations(db: Session) -> list[GapRecommendation]:
+
+def generate_recommendations(db: Session, min_times_asked: int = 2) -> list[GapRecommendation]:
+    """
+    Clusters unanswered queries, and for each cluster that has been asked
+    at least min_times_asked times and doesn't already have a
+    recommendation, drafts an FAQ suggestion and saves it as pending.
+    """
     clusters = cluster_unanswered_queries(db)
-    
-    existing_topics ={
+
+    existing_topics = {
         row.topic for row in db.query(GapRecommendation.topic).all()
     }
-    
-    new_recommendation = []
-    
+
+    new_recommendations = []
+
     for cluster in clusters:
+        if cluster["count"] < min_times_asked:
+            continue
+
         if cluster["representative_question"] in existing_topics:
             continue
-        
+
         draft = _draft_faq_entry(cluster["questions"])
-        
+
         recommendation = GapRecommendation(
             topic=cluster["representative_question"],
             example_questions="\n".join(cluster["questions"]),
@@ -76,8 +86,8 @@ def generate_recommendations(db: Session) -> list[GapRecommendation]:
             status="pending",
         )
         db.add(recommendation)
-        new_recommendation.append(recommendation)
-        
+        new_recommendations.append(recommendation)
+
     db.commit()
-    
-    return new_recommendation
+
+    return new_recommendations
