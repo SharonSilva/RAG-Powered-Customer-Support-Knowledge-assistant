@@ -48,5 +48,25 @@ class QueryLog(Base):
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-
+class GapRecommendation(Base):
+    """
+    An AI-drafted FAQ suggestion generated from a cluster of unanswered 
+    customer questions. Starts as "pending" for a business to review;
+    can be approved or rejected
+    """
+    
+    __tablename__ = "gap_recommendations"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    topic = Column(Text, nullable=False)
+    example_questions = Column(Text, nullable=False)
+    times_asked = Column(Integer, nullable=False)
+    
+    suggested_question = Column(Text, nullable=False)
+    suggested_answer = Column(Text, nullable=False)
+    
+    status = Column(String, nullable=False, default="pending")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    
     
