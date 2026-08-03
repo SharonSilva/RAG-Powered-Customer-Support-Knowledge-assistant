@@ -17,6 +17,7 @@ from app.services.generation import generate_answer
 from app.services.clustering import cluster_unanswered_queries
 from app.services.recommendations import generate_recommendations
 from app.services.impact_analytics import get_summary, get_daily_trend
+from app.models import QueryLog
 from app.models import GapRecommendation
 
 app = FastAPI(title="RAG-powered Customer Support Knowledge Assistant")
@@ -111,6 +112,52 @@ async def ingest_url(payload: UrlIngestRequest, db: Session = Depends(get_db)):
         "num_chunks": len(chunks),
     }
     
+class FeedbackRequest(BaseModel):
+    feedback: str
+
+
+@app.patch("/query-logs/{query_log_id}/feedback")
+async def submit_feedback(query_log_id: int, payload: FeedbackRequest, db: Session = Depends(get_db)):
+    if payload.feedback not in {"up", "down"}:
+        raise HTTPException(status_code=400, detail="feedback must be 'up' or 'down'")
+
+    log = db.query(QueryLog).filter(QueryLog.id == query_log_id).first()
+    if not log:
+        raise HTTPException(status_code=404, detail="Query log not found")
+
+    log.feedback = payload.feedback
+    if payload.feedback == "down":
+        log.flagged = True
+
+    db.commit()
+
+    return {"id": log.id, "feedback": log.feedback, "flagged": log.flagged}
+
+
+@app.get("/analytics/flagged")
+async def list_flagged_queries(db: Session = Depends(get_db)):
+    logs = (
+        db.query(QueryLog)
+        .filter(QueryLog.flagged == True)
+        .order_by(QueryLog.created_at.desc())
+        .all()
+    )
+
+    return {
+        "flagged_queries": [
+            {
+                "id": log.id,
+                "question": log.question,
+                "answered": log.answered,
+                "top_score": log.top_score,
+                "feedback": log.feedback,
+                "created_at": log.created_at,
+            }
+            for log in logs
+        ],
+    }
+
+
 @app.get("/analytics/summary")
 async def get_analytics_summary(db: Session = Depends(get_db)):
     summary = get_summary(db)
