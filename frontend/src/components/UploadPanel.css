@@ -1,0 +1,64 @@
+
+.upload-panel {
+  width: 200px;
+  padding-right: 20px;
+  border-right: 1px solid var(--color-border);
+}
+
+.upload-panel-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin: 0 0 10px;
+}
+
+.upload-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  padding: 16px 10px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  margin-bottom: 14px;
+}
+
+.upload-dropzone:hover {
+  border-color: var(--color-teal);
+}
+
+.category-select {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.category-select label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.category-select select {
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 12px;
+}
+
+.upload-status {
+  font-size: 11px;
+  color: var(--color-teal);
+  background: var(--color-teal-bg);
+  border-radius: var(--radius);
+  padding: 8px;
+}
+
+.upload-status--error {
+  color: var(--color-coral);
+  background: var(--color-coral-bg);
+}
