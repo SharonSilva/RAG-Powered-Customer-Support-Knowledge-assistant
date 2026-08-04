@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import get_db
 from app.models import Document, Chunk
@@ -18,9 +19,18 @@ from app.services.clustering import cluster_unanswered_queries
 from app.services.recommendations import generate_recommendations
 from app.services.impact_analytics import get_summary, get_daily_trend
 from app.models import QueryLog
+from app.services.health_score import compute_health_score
 from app.models import GapRecommendation
 
 app = FastAPI(title="RAG-powered Customer Support Knowledge Assistant")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/health")
 def health_check():
@@ -162,10 +172,12 @@ async def list_flagged_queries(db: Session = Depends(get_db)):
 async def get_analytics_summary(db: Session = Depends(get_db)):
     summary = get_summary(db)
     trend = get_daily_trend(db)
+    health = compute_health_score(db)
 
     return {
         "overall": summary,
         "daily_trend": trend,
+        "health_score": health,
     }
 
 
