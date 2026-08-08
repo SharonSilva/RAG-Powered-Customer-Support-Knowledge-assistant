@@ -8,10 +8,40 @@
   box-sizing: border-box;
 }
 
+.app-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .app-header {
   font-size: 20px;
   font-weight: 600;
-  margin: 0 0 20px;
+  margin: 0;
+}
+
+.tab-switcher {
+  display: flex;
+  gap: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 3px;
+}
+
+.tab-button {
+  font-size: 12px;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  color: var(--color-text-secondary);
+}
+
+.tab-button--active {
+  background: var(--color-teal);
+  color: white;
 }
 
 .app-body {
