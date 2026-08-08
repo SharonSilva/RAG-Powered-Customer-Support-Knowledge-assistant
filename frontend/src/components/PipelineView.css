@@ -1,0 +1,41 @@
+.pipeline-view {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+}
+
+.pipeline-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  transition: color 0.2s;
+}
+
+.pipeline-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.pipeline-step--done {
+  color: var(--color-text-secondary);
+}
+
+.pipeline-step--done .pipeline-dot {
+  background: var(--color-teal);
+}
+
+.pipeline-step--active {
+  color: var(--color-teal);
+  font-weight: 500;
+}
+
+.pipeline-step--active .pipeline-dot {
+  background: var(--color-teal);
+  box-shadow: 0 0 0 3px var(--color-teal-bg);
+}

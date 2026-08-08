@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { askQuestion, type AskResponse } from "../api";
+import PipelineView from "./PipelineView";
 import "./ChatPanel.css";
 
 const FALLBACK_TEXT = "I don't have information on that in the knowledge base.";
@@ -110,7 +111,7 @@ export default function ChatPanel() {
             </div>
           )
         )}
-        {loading && <div className="thinking">Thinking…</div>}
+        {loading && <PipelineView active={loading} />}
       </div>
 
       <div className="chat-input-row">
