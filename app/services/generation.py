@@ -59,14 +59,14 @@ def generate_answer(
 
     if not candidates:
         log_id = _log_query(db, query, query_embedding, category, None, answered=False, session_id=session_id)
-        return {"answer": FALLBACK_MESSAGE, "sources": [], "query_log_id": log_id}
+        return {"answer": FALLBACK_MESSAGE, "sources": [], "query_log_id": log_id, "confidence": None}
 
     scored_chunks = rerank_with_scores(query, candidates, top_k=5)
     top_score = scored_chunks[0][1]
 
     if top_score < CONFIDENCE_THRESHOLD:
         log_id = _log_query(db, query, query_embedding, category, top_score, answered=False, session_id=session_id)
-        return {"answer": FALLBACK_MESSAGE, "sources": [], "query_log_id": log_id}
+        return {"answer": FALLBACK_MESSAGE, "sources": [], "query_log_id": log_id, "confidence": round(top_score, 2)}
 
     context = _build_context(scored_chunks)
 
@@ -103,4 +103,9 @@ def generate_answer(
 
     log_id = _log_query(db, query, query_embedding, category, top_score, answered=True, session_id=session_id)
 
-    return {"answer": answer_text, "sources": sources, "query_log_id": log_id}
+    return {
+        "answer": answer_text,
+        "sources": sources,
+        "query_log_id": log_id,
+        "confidence": round(top_score, 2),
+    }

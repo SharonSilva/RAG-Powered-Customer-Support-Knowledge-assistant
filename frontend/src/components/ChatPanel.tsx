@@ -4,11 +4,20 @@ import "./ChatPanel.css";
 
 const FALLBACK_TEXT = "I don't have information on that in the knowledge base.";
 
+const SAMPLE_QUESTIONS = [
+  "What's your return policy?",
+  "How do I reset my password?",
+  "Can I cancel my subscription?",
+  "What are your support hours?",
+];
+
 interface Message {
   role: "user" | "assistant";
   text: string;
   sources?: AskResponse["sources"];
   queryLogId?: number;
+  responseTimeMs?: number;
+  confidence?: number | null;
 }
 
 export default function ChatPanel() {
@@ -16,16 +25,19 @@ export default function ChatPanel() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSend() {
-    const question = input.trim();
+  async function sendMessage(question: string) {
     if (!question || loading) return;
 
     setMessages((prev) => [...prev, { role: "user", text: question }]);
     setInput("");
     setLoading(true);
 
+    const startTime = performance.now();
+
     try {
       const result = await askQuestion(question);
+      const responseTimeMs = Math.round(performance.now() - startTime);
+
       setMessages((prev) => [
         ...prev,
         {
@@ -33,6 +45,8 @@ export default function ChatPanel() {
           text: result.answer,
           sources: result.sources,
           queryLogId: result.query_log_id,
+          responseTimeMs,
+          confidence: result.confidence,
         },
       ]);
     } catch (err) {
@@ -45,12 +59,23 @@ export default function ChatPanel() {
     }
   }
 
+  function handleSend() {
+    sendMessage(input.trim());
+  }
+
   return (
     <div className="chat-panel">
       <div className="message-list">
         {messages.length === 0 && (
           <div className="empty-state">
-            Ask a question about your uploaded documents to get started.
+            <p>Ask a question about your uploaded documents to get started.</p>
+            <div className="sample-chips">
+              {SAMPLE_QUESTIONS.map((q) => (
+                <button key={q} className="sample-chip" onClick={() => sendMessage(q)}>
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -74,6 +99,14 @@ export default function ChatPanel() {
                   ))}
                 </div>
               )}
+              {msg.responseTimeMs !== undefined && (
+                <div className="response-meta">
+                  Answered in {(msg.responseTimeMs / 1000).toFixed(1)}s
+                  {msg.confidence !== null && msg.confidence !== undefined && (
+                    <> · confidence {Math.round(msg.confidence * 100)}%</>
+                  )}
+                </div>
+              )}
             </div>
           )
         )}
@@ -92,6 +125,8 @@ export default function ChatPanel() {
           Send
         </button>
       </div>
+
+      <div className="tech-badge">RAG · pgvector · GPT-4o-mini</div>
     </div>
   );
 }

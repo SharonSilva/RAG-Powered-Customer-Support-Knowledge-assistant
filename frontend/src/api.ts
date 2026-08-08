@@ -13,6 +13,7 @@ export interface AskResponse {
   answer: string;
   sources: Source[];
   query_log_id: number;
+  confidence: number | null;
 }
 
 export async function askQuestion(question: string, category?: string): Promise<AskResponse> {
