@@ -1,6 +1,9 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const NGROK_HEADERS = { "ngrok-skip-browser-warning": "true" };
+const REQUEST_HEADERS = {
+  "ngrok-skip-browser-warning": "true",
+  "x-api-key": import.meta.env.VITE_API_KEY,
+};
 
 export interface Source {
   ref: number;
@@ -19,7 +22,7 @@ export interface AskResponse {
 export async function askQuestion(question: string, category?: string): Promise<AskResponse> {
   const response = await fetch(`${API_BASE_URL}/ask`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...NGROK_HEADERS },
+    headers: { "Content-Type": "application/json", ...REQUEST_HEADERS },
     body: JSON.stringify({ question, category: category || null }),
   });
 
@@ -33,7 +36,7 @@ export async function askQuestion(question: string, category?: string): Promise<
 export async function submitFeedback(queryLogId: number, feedback: "up" | "down"): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/query-logs/${queryLogId}/feedback`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json", ...NGROK_HEADERS },
+    headers: { "Content-Type": "application/json", ...REQUEST_HEADERS },
     body: JSON.stringify({ feedback }),
   });
 
@@ -58,7 +61,7 @@ export async function uploadDocument(file: File, category?: string): Promise<Upl
 
   const response = await fetch(`${API_BASE_URL}/upload`, {
     method: "POST",
-    headers: NGROK_HEADERS,
+    headers: REQUEST_HEADERS,
     body: formData,
   });
 
@@ -83,7 +86,7 @@ export interface AnalyticsSummary {
 }
 
 export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
-  const response = await fetch(`${API_BASE_URL}/analytics/summary`, { headers: NGROK_HEADERS });
+  const response = await fetch(`${API_BASE_URL}/analytics/summary`, { headers: REQUEST_HEADERS });
 
   if (!response.ok) {
     throw new Error(`Analytics request failed: ${response.status}`);
@@ -100,7 +103,7 @@ export interface GapCluster {
 }
 
 export async function getKnowledgeGaps(): Promise<{ total_gap_clusters: number; gaps: GapCluster[] }> {
-  const response = await fetch(`${API_BASE_URL}/analytics/gaps`, { headers: NGROK_HEADERS });
+  const response = await fetch(`${API_BASE_URL}/analytics/gaps`, { headers: REQUEST_HEADERS });
   if (!response.ok) throw new Error(`Request failed: ${response.status}`);
   return response.json();
 }
@@ -119,7 +122,7 @@ export async function getRecommendations(status?: string): Promise<{ recommendat
   const url = status
     ? `${API_BASE_URL}/analytics/recommendations?status=${status}`
     : `${API_BASE_URL}/analytics/recommendations`;
-  const response = await fetch(url, { headers: NGROK_HEADERS });
+  const response = await fetch(url, { headers: REQUEST_HEADERS });
   if (!response.ok) throw new Error(`Request failed: ${response.status}`);
   return response.json();
 }
@@ -127,7 +130,7 @@ export async function getRecommendations(status?: string): Promise<{ recommendat
 export async function generateRecommendations(): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/analytics/recommendations/generate`, {
     method: "POST",
-    headers: NGROK_HEADERS,
+    headers: REQUEST_HEADERS,
   });
   if (!response.ok) throw new Error(`Request failed: ${response.status}`);
 }
@@ -135,7 +138,7 @@ export async function generateRecommendations(): Promise<void> {
 export async function updateRecommendationStatus(id: number, status: "approved" | "rejected"): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/analytics/recommendations/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json", ...NGROK_HEADERS },
+    headers: { "Content-Type": "application/json", ...REQUEST_HEADERS },
     body: JSON.stringify({ status }),
   });
   if (!response.ok) throw new Error(`Request failed: ${response.status}`);
