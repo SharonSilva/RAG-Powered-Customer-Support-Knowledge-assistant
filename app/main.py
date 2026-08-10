@@ -29,7 +29,7 @@ app = FastAPI(title="RAG-powered Customer Support Knowledge Assistant")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "https://rag-powered-customer-support-knowledge-assistant-q3yoy5x98.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
