@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import "./Landing.css";
 
 interface LandingProps {
@@ -5,8 +6,30 @@ interface LandingProps {
 }
 
 export default function Landing({ onLaunch }: LandingProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const els = rootRef.current?.querySelectorAll(".reveal");
+    if (!els) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("reveal--visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="landing">
+    <div className="landing" ref={rootRef}>
       <nav className="landing-nav">
         <div className="landing-nav-brand">
           <span className="landing-nav-mark">1</span>
@@ -59,16 +82,16 @@ export default function Landing({ onLaunch }: LandingProps) {
       </header>
 
       <section className="landing-section" id="trust">
-        <div className="landing-section-head">
+        <div className="landing-section-head reveal">
           <h2>Built to earn trust, not just sound confident.</h2>
           <p>
             Most AI chatbots guess when they don't know. This one shows its
-            work  and tells you what it's missing.
+            work — and tells you what it's missing.
           </p>
         </div>
 
         <div className="trust-grid">
-          <div className="trust-card">
+          <div className="trust-card reveal">
             <div className="trust-card-tag">[1]</div>
             <h3>Grounded answers</h3>
             <p>
@@ -82,7 +105,7 @@ export default function Landing({ onLaunch }: LandingProps) {
             </div>
           </div>
 
-          <div className="trust-card">
+          <div className="trust-card reveal">
             <div className="trust-card-tag">[2]</div>
             <h3>Honest when it doesn't know</h3>
             <p>
@@ -96,7 +119,7 @@ export default function Landing({ onLaunch }: LandingProps) {
             </div>
           </div>
 
-          <div className="trust-card">
+          <div className="trust-card reveal">
             <div className="trust-card-tag">[3]</div>
             <h3>Knows what's missing</h3>
             <p>
@@ -112,27 +135,27 @@ export default function Landing({ onLaunch }: LandingProps) {
       </section>
 
       <section className="landing-section steps-section" id="how">
-        <div className="landing-section-head">
+        <div className="landing-section-head reveal">
           <h2>How it works</h2>
           <p>Three steps from raw documents to a self-improving knowledge base.</p>
         </div>
 
         <div className="steps-list">
-          <div className="step-item">
+          <div className="step-item reveal">
             <div className="step-number">1</div>
             <div>
               <h4>Upload your documents</h4>
               <p>PDF, Word, Markdown, or a URL — organized by category.</p>
             </div>
           </div>
-          <div className="step-item">
+          <div className="step-item reveal">
             <div className="step-number">2</div>
             <div>
               <h4>Customers ask questions</h4>
               <p>Answered directly from your content, with citations attached.</p>
             </div>
           </div>
-          <div className="step-item">
+          <div className="step-item reveal">
             <div className="step-number">3</div>
             <div>
               <h4>Track what's missing</h4>
@@ -142,7 +165,7 @@ export default function Landing({ onLaunch }: LandingProps) {
         </div>
       </section>
 
-      <section className="footer-cta">
+      <section className="footer-cta reveal">
         <h2>See it answer your own questions.</h2>
         <p>No signup needed — try the live demo right now.</p>
         <button className="landing-btn-primary" onClick={onLaunch}>
@@ -150,6 +173,24 @@ export default function Landing({ onLaunch }: LandingProps) {
         </button>
         <div className="landing-footer-badge">RAG · pgvector · GPT-4o-mini</div>
       </section>
+
+      <button
+        className="bot-mascot"
+        onClick={onLaunch}
+        aria-label="Try the live demo"
+        title="Try the live demo"
+        style={{ background: "none", border: "none", padding: 0 }}
+      >
+        <svg viewBox="0 0 64 64" width="64" height="64">
+          <line x1="32" y1="4" x2="32" y2="12" stroke="var(--color-text-secondary)" strokeWidth="2" />
+          <circle cx="32" cy="4" r="3.5" fill="var(--color-amber)" />
+          <rect x="8" y="10" width="48" height="42" rx="14" fill="var(--color-teal)" />
+          <rect x="14" y="20" width="36" height="26" rx="10" fill="var(--color-surface)" />
+          <ellipse className="bot-eye" cx="24" cy="33" rx="3.2" ry="4" fill="var(--color-teal)" />
+          <ellipse className="bot-eye" cx="40" cy="33" rx="3.2" ry="4" fill="var(--color-teal)" />
+          <path d="M25 40 Q32 45 39 40" stroke="var(--color-teal)" strokeWidth="2" fill="none" strokeLinecap="round" />
+        </svg>
+      </button>
     </div>
   );
 }

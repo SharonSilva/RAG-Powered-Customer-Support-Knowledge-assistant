@@ -4,10 +4,10 @@
   --nav-h: 72px;
   background-color: var(--color-bg);
   background-image:
-    radial-gradient(900px 700px at 8% 0%, rgba(42, 111, 111, 0.16), transparent 60%),
-    radial-gradient(800px 650px at 100% 12%, rgba(163, 121, 28, 0.13), transparent 55%),
-    radial-gradient(700px 700px at 30% 100%, rgba(42, 111, 111, 0.12), transparent 60%);
-  background-attachment: fixed;
+    radial-gradient(1000px 900px at 10% 8%, rgba(42, 111, 111, 0.16), transparent 55%),
+    radial-gradient(900px 800px at 95% 32%, rgba(163, 121, 28, 0.13), transparent 50%),
+    radial-gradient(900px 900px at 20% 78%, rgba(42, 111, 111, 0.13), transparent 55%),
+    radial-gradient(800px 700px at 85% 95%, rgba(163, 121, 28, 0.10), transparent 55%);
   background-repeat: no-repeat;
 }
 
@@ -354,5 +354,96 @@
   }
   .landing-nav-links {
     display: none;
+  }
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing-eyebrow,
+.landing-hero h1,
+.landing-hero p.landing-sub,
+.landing-hero-actions,
+.hero-card {
+  opacity: 0;
+  animation: fadeUp 0.6s ease-out forwards;
+}
+
+.landing-eyebrow { animation-delay: 0.05s; }
+.landing-hero h1 { animation-delay: 0.15s; }
+.landing-hero p.landing-sub { animation-delay: 0.3s; }
+.landing-hero-actions { animation-delay: 0.42s; }
+.hero-card { animation-delay: 0.5s; }
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+}
+
+.reveal--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-eyebrow,
+  .landing-hero h1,
+  .landing-hero p.landing-sub,
+  .landing-hero-actions,
+  .hero-card,
+  .reveal {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+.bot-mascot {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 64px;
+  height: 64px;
+  z-index: 40;
+  animation: botFloat 3.2s ease-in-out infinite;
+  cursor: pointer;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.18));
+}
+
+@keyframes botFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.bot-mascot:hover {
+  animation-play-state: paused;
+  transform: translateY(-4px) scale(1.05);
+}
+
+.bot-eye {
+  animation: botBlink 4.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes botBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bot-mascot {
+    animation: none;
+  }
+  .bot-eye {
+    animation: none;
   }
 }
