@@ -75,7 +75,7 @@ def generate_answer(
         "using ONLY the information in the provided context. "
         "Cite the source of every claim using its bracketed number, e.g. [1]. "
         "If the context does not contain enough information to answer, say "
-        "you don't have information on that — do not guess or use outside knowledge."
+        "you don't have information on that  do not guess or use outside knowledge."
     )
 
     user_prompt = f"Context:\n{context}\n\nQuestion: {query}"

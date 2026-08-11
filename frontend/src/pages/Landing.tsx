@@ -50,7 +50,7 @@ export default function Landing({ onLaunch }: LandingProps) {
             <div className="landing-eyebrow">RAG · pgvector · GPT-4o-mini</div>
             <h1>Support answers your customers can actually trust.</h1>
             <p className="landing-sub">
-              Upload your documents. Get grounded answers with real citations —
+              Upload your documents. Get grounded answers with real citations 
               and see exactly what your knowledge base is still missing.
             </p>
             <div className="landing-hero-actions">
@@ -86,7 +86,7 @@ export default function Landing({ onLaunch }: LandingProps) {
           <h2>Built to earn trust, not just sound confident.</h2>
           <p>
             Most AI chatbots guess when they don't know. This one shows its
-            work — and tells you what it's missing.
+            work and tells you what it's missing.
           </p>
         </div>
 
@@ -96,7 +96,7 @@ export default function Landing({ onLaunch }: LandingProps) {
             <h3>Grounded answers</h3>
             <p>
               Every answer traces back to your actual documents, with the
-              exact section cited — so your team can verify it in one click.
+              exact section cited so your team can verify it in one click.
             </p>
             <div className="trust-card-visual">
               <div className="hero-card-source-tag">
@@ -109,7 +109,7 @@ export default function Landing({ onLaunch }: LandingProps) {
             <div className="trust-card-tag">[2]</div>
             <h3>Honest when it doesn't know</h3>
             <p>
-              If the answer isn't in your docs, it says so — instead of
+              If the answer isn't in your docs, it says so  instead of
               guessing and eroding customer trust.
             </p>
             <div className="trust-card-visual">
@@ -145,7 +145,7 @@ export default function Landing({ onLaunch }: LandingProps) {
             <div className="step-number">1</div>
             <div>
               <h4>Upload your documents</h4>
-              <p>PDF, Word, Markdown, or a URL — organized by category.</p>
+              <p>PDF, Word, Markdown, or a URL  organized by category.</p>
             </div>
           </div>
           <div className="step-item reveal">
@@ -167,7 +167,7 @@ export default function Landing({ onLaunch }: LandingProps) {
 
       <section className="footer-cta reveal">
         <h2>See it answer your own questions.</h2>
-        <p>No signup needed — try the live demo right now.</p>
+        <p>No signup needed  try the live demo right now.</p>
         <button className="landing-btn-primary" onClick={onLaunch}>
           Try the live demo
         </button>
