@@ -17,39 +17,44 @@ function App() {
   }
 
   return (
-    <div className="app-container">
-      <div className="app-header-row">
-        <h1 className="app-header" onClick={() => setView("landing")} style={{ cursor: "pointer" }}>
+    <div className="app-shell">
+      <aside className="app-sidebar">
+        <button className="sidebar-brand" onClick={() => setView("landing")}>
+          <span className="sidebar-brand-mark">1</span>
           Support Assistant
-        </h1>
-        <div className="tab-switcher">
+        </button>
+
+        <nav className="sidebar-nav">
           <button
-            className={tab === "assistant" ? "tab-button tab-button--active" : "tab-button"}
+            className={
+              tab === "assistant" ? "sidebar-nav-item sidebar-nav-item--active" : "sidebar-nav-item"
+            }
             onClick={() => setTab("assistant")}
           >
-            Assistant
+            <span className="sidebar-nav-dot" />
+            Chat
           </button>
           <button
-            className={tab === "analytics" ? "tab-button tab-button--active" : "tab-button"}
+            className={
+              tab === "analytics" ? "sidebar-nav-item sidebar-nav-item--active" : "sidebar-nav-item"
+            }
             onClick={() => setTab("analytics")}
           >
+            <span className="sidebar-nav-dot" />
             Analytics
           </button>
-        </div>
-      </div>
+        </nav>
 
-      {tab === "assistant" ? (
-        <div className="app-body">
-          <UploadPanel />
-          <div className="chat-column">
-            <ChatPanel />
-          </div>
+        <div className="sidebar-divider" />
+
+        <UploadPanel />
+      </aside>
+
+      <main className="app-main">
+        <div className="app-main-inner">
+          {tab === "assistant" ? <ChatPanel /> : <AnalyticsDashboard />}
         </div>
-      ) : (
-        <div className="app-body">
-          <AnalyticsDashboard />
-        </div>
-      )}
+      </main>
     </div>
   );
 }

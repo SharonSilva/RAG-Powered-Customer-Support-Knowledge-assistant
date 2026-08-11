@@ -8,14 +8,14 @@
   --color-text-secondary: #5b6472;
   --color-text-muted: #8a94a3;
 
-  --color-teal: #2a6f6f;
-  --color-teal-bg: #e6f0f0;
+  --color-teal: #1f7a6f;
+  --color-teal-bg: #dcf1ec;
 
-  --color-amber: #a3791c;
-  --color-amber-bg: #fbf2df;
+  --color-amber: #b8860b;
+  --color-amber-bg: #faedcf;
 
-  --color-coral: #b5533c;
-  --color-coral-bg: #f9e8e3;
+  --color-coral: #c04a34;
+  --color-coral-bg: #f9e0da;
 
   --font-body: 'Inter', -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
@@ -33,7 +33,7 @@ body {
   background: var(--color-bg);
   color: var(--color-text-primary);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.6;
 }
 
