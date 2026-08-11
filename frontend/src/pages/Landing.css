@@ -2,6 +2,13 @@
 
 .landing {
   --nav-h: 72px;
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(900px 700px at 8% 0%, rgba(42, 111, 111, 0.16), transparent 60%),
+    radial-gradient(800px 650px at 100% 12%, rgba(163, 121, 28, 0.13), transparent 55%),
+    radial-gradient(700px 700px at 30% 100%, rgba(42, 111, 111, 0.12), transparent 60%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 .landing-nav {
