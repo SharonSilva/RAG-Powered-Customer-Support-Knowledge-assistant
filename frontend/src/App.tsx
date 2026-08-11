@@ -3,14 +3,19 @@ import ChatPanel from "./components/ChatPanel";
 import UploadPanel from "./components/UploadPanel";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
 import Landing from "./pages/Landing";
+import Marketing from "./pages/Marketing";
 import "./App.css";
 
 type Tab = "assistant" | "analytics";
-type View = "landing" | "app";
+type View = "marketing" | "landing" | "app";
 
 function App() {
-  const [view, setView] = useState<View>("landing");
+  const [view, setView] = useState<View>("marketing");
   const [tab, setTab] = useState<Tab>("assistant");
+
+  if (view === "marketing") {
+    return <Marketing onContinue={() => setView("landing")} />;
+  }
 
   if (view === "landing") {
     return <Landing onLaunch={() => setView("app")} />;
