@@ -58,7 +58,7 @@ export default function Marketing({ onContinue }: MarketingProps) {
         </h1>
         <p className="mkt-hero-sub">
           An AI knowledge assistant that answers customers directly from your
-          own content — cites every source, tells the truth when it doesn't
+          own content  cites every source, tells the truth when it doesn't
           know, and shows you exactly what to fix next.
         </p>
         <div className="mkt-hero-actions">
@@ -108,7 +108,7 @@ export default function Marketing({ onContinue }: MarketingProps) {
               <div className="mkt-value-num">01</div>
               <h3>Fewer repetitive tickets</h3>
               <p>
-                Customers get instant, accurate answers from your own docs —
+                Customers get instant, accurate answers from your own docs 
                 without waiting in a support queue.
               </p>
             </div>
@@ -124,7 +124,7 @@ export default function Marketing({ onContinue }: MarketingProps) {
               <div className="mkt-value-num">03</div>
               <h3>A knowledge base that improves itself</h3>
               <p>
-                Every unanswered question becomes a tracked, actionable gap —
+                Every unanswered question becomes a tracked, actionable gap 
                 with AI-drafted fixes ready for review.
               </p>
             </div>
@@ -135,7 +135,7 @@ export default function Marketing({ onContinue }: MarketingProps) {
       <section className="mkt-final">
         <div className="mkt-orb mkt-orb--1" style={{ opacity: 0.2 }} />
         <h2 className="mkt-reveal">Ready to see it work?</h2>
-        <p className="mkt-reveal">No signup required — explore the live platform now.</p>
+        <p className="mkt-reveal">No signup required  explore the live platform now.</p>
         <button className="mkt-btn-primary mkt-reveal" onClick={onContinue}>
           Explore the platform
         </button>
